@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://hrms-app-3wzl.onrender.com'
+const API_BASE_URL = 'https://hrms-app-3wzl.onrender.com/api/'
 
 // Create axios instance with default config
 const api = axios.create({
