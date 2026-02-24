@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { attendanceAPI, employeeAPI, handleAPIError } from '../services/api';
 import { useToast } from '../context/ToastContext';
@@ -20,14 +20,7 @@ const AttendanceForm = () => {
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(isEdit);
 
-  useEffect(() => {
-    fetchEmployees();
-    if (isEdit) {
-      fetchAttendanceRecord();
-    }
-  }, [id, isEdit]);
-
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     try {
       const response = await employeeAPI.getSimpleList();
       const employeeData = response.data.data || response.data;
@@ -36,9 +29,9 @@ const AttendanceForm = () => {
       const errorInfo = handleAPIError(error);
       showError(errorInfo.message);
     }
-  };
+  }, [showError]);
 
-  const fetchAttendanceRecord = async () => {
+  const fetchAttendanceRecord = useCallback(async () => {
     try {
       setFetchingData(true);
       const response = await attendanceAPI.getById(id);
@@ -55,7 +48,14 @@ const AttendanceForm = () => {
     } finally {
       setFetchingData(false);
     }
-  };
+  }, [id, showError, navigate]);
+
+  useEffect(() => {
+    fetchEmployees();
+    if (isEdit) {
+      fetchAttendanceRecord();
+    }
+  }, [fetchEmployees, fetchAttendanceRecord, isEdit]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

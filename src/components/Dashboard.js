@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { dashboardAPI, handleAPIError } from '../services/api';
 import { useToast } from '../context/ToastContext';
@@ -8,11 +8,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const { showError } = useToast();
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await dashboardAPI.getSummary();
@@ -35,7 +31,11 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showError]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   if (loading) {
     return <div className="loading">Loading dashboard...</div>;

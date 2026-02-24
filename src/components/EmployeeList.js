@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { employeeAPI, handleAPIError } from '../services/api';
 import { useToast } from '../context/ToastContext';
@@ -11,11 +11,7 @@ const EmployeeList = () => {
   const [departments, setDepartments] = useState([]);
   const { showSuccess, showError } = useToast();
 
-  useEffect(() => {
-    fetchEmployees();
-  }, [searchTerm, departmentFilter]);
-
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     try {
       setLoading(true);
       const params = {};
@@ -56,7 +52,11 @@ const EmployeeList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, departmentFilter, showError]);
+
+  useEffect(() => {
+    fetchEmployees();
+  }, [fetchEmployees]);
 
   const handleDelete = async (id, name) => {
     if (window.confirm(`Are you sure you want to delete employee ${name}?`)) {

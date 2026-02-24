@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { employeeAPI, handleAPIError } from '../services/api';
 import { useToast } from '../context/ToastContext';
@@ -20,13 +20,7 @@ const EmployeeForm = () => {
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(isEdit);
 
-  useEffect(() => {
-    if (isEdit) {
-      fetchEmployee();
-    }
-  }, [id, isEdit]);
-
-  const fetchEmployee = async () => {
+  const fetchEmployee = useCallback(async () => {
     try {
       setFetchingData(true);
       const response = await employeeAPI.getById(id);
@@ -44,7 +38,13 @@ const EmployeeForm = () => {
     } finally {
       setFetchingData(false);
     }
-  };
+  }, [id, showError, navigate]);
+
+  useEffect(() => {
+    if (isEdit) {
+      fetchEmployee();
+    }
+  }, [isEdit, fetchEmployee]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { attendanceAPI, employeeAPI, handleAPIError } from '../services/api';
 import { useToast } from '../context/ToastContext';
@@ -15,16 +15,7 @@ const AttendanceList = () => {
   });
   const { showSuccess, showError } = useToast();
 
-  useEffect(() => {
-    fetchEmployees();
-    fetchAttendanceRecords();
-  }, []);
-
-  useEffect(() => {
-    fetchAttendanceRecords();
-  }, [filters]);
-
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     try {
       const response = await employeeAPI.getSimpleList();
       
@@ -50,9 +41,9 @@ const AttendanceList = () => {
       console.error('Error fetching employees:', error);
       setEmployees([]);
     }
-  };
+  }, []);
 
-  const fetchAttendanceRecords = async () => {
+  const fetchAttendanceRecords = useCallback(async () => {
     try {
       setLoading(true);
       const params = {};
@@ -92,7 +83,16 @@ const AttendanceList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, showError]);
+
+  useEffect(() => {
+    fetchEmployees();
+    fetchAttendanceRecords();
+  }, [fetchEmployees, fetchAttendanceRecords]);
+
+  useEffect(() => {
+    fetchAttendanceRecords();
+  }, [fetchAttendanceRecords]);
 
   const handleDelete = async (id, employeeName, date) => {
     if (window.confirm(`Are you sure you want to delete attendance record for ${employeeName} on ${date}?`)) {
